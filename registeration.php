@@ -19,9 +19,19 @@
      if(empty($username)){
       $error['name'] = "Name is Required";
      }
+
      if(empty($email)){
       $error['email'] = "Email is Required";
+     }else{
+     
+      $sql = "Select * from students where email = '". $email ."'";
+      $data = mysqli_query($conn,$sql);
+      $row_count = $data->num_rows;
+      if($row_count > 0){
+        $error['email_exist'] = "this email is already exists";
+      }
      }
+
      if(empty($password)){
       $error['password'] = "Password is Required";
      }
@@ -45,7 +55,10 @@
      }
      if($password != $c_password){
       $error['match'] = "passowrd not matched";
+     }else{
+      $password = md5($password);
      }
+
      //echo "<pre>";print_r($_FILES['image']);die;
      $image_name = $_FILES['image']['name'];
      $image_tmp_name = $_FILES['image']['tmp_name'];
@@ -63,8 +76,10 @@
 
      if(empty($error)){
       $image_name = time().'-'.$image_name;
-
+      unset($sql);
+      unset($data);
       $sql = "INSERT INTO students (Name, email, password, contact, dob, gender, city, country, profile) VALUES ('". $username ."', '". $email ."', '". $password ."', '". $contact ."', '". $dob ."', '". $gender ."', '". $city ."', '". $country ."', '". $image_name ."')";
+      
       $data = mysqli_query($conn,$sql);
       if(!$data){
         die('Error'. $conn->error);

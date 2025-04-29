@@ -1,6 +1,4 @@
-<?PHP
-session_start();
-require_once("connection.php"); ?>
+<?PHP require_once("connection.php"); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +13,7 @@ require_once("connection.php"); ?>
 <body>
   <?php
 
- if(isset($_POST['login'])){
+ if(isset($_POST['forget'])){
     
     $error = array();
     
@@ -23,6 +21,13 @@ require_once("connection.php"); ?>
 
     if(empty($email)){
         $error['email'] = 'Email or Name is required';
+    }else{ 
+      $sql = "Select * from students where email = '". $email ."'";
+      $data = mysqli_query($conn,$sql);
+      $row_count = $data->num_rows;
+      if($row_count == 0){
+        $error['email_exist'] = "this email is not valid";
+      }
     }
 
     if(empty($password)){
@@ -32,21 +37,12 @@ require_once("connection.php"); ?>
     }
 
     if(empty($error)){
-      $sql = "SELECT * FROM students WHERE email = '". $email ."' AND password = '". $password ."' OR name = '". $email ."' AND password = '". $password ."' ";
       
-      $data = mysqli_query($conn,$sql);
-      if(!$data){
-        die('error'.$conn->error);
-      }else{
-          $count = $data->num_rows;
-          if($count > 0){
-            $_SESSION['email'] =  $email;
-            header('location:profile.php?msg=User has been login successfully');
-          }else{
-            $error['match'] = "Email and Password has not matched";
-          }
+      $sql1 = "UPDATE students set password = '". $password ."' WHERE email = '". $email ."' ";
+      $data1 = mysqli_query($conn, $sql1);
+      if($data1){
+        $msg = "Password updated successfully";
       }
-      
     }
     
  }
@@ -68,16 +64,16 @@ if(!empty($error)){ ?>
 </div>
 <?php } ?>
     <div class="container mt-3">
-        <p class="h4 bg-dark text-white mt-3 text-center rounded p-2">Login Form</p>
+        <p class="h4 bg-dark text-white mt-3 text-center rounded p-2">Forget Password</p>
         <form action="" method="POST" class="bg-light rounded">
            
-            Email or Name<span>*</span><input type="text" id="email" name="email" class="form-control">
+            Email <span>*</span><input type="text" id="email" name="email" class="form-control">
             <span id="email_err"></span><br>
             Password<span>*</span><input type="password" id="password" name="password" class="form-control">
             <span id="password_err"></span><br>
            
-            <input type="submit" name="login" id="login" class="btn btn-success w-100 text-center mt-3">
-            <a href="registeration.php">Registered Account</a><a href="forget_password.php" class="float-end text-right">Forget Password</a>
+            <input type="submit" name="forget" id="forget" class="btn btn-success w-100 text-center mt-3">
+            <a href="login.php">Login Account</a>
         </form>
         <br><br>
     </div>
@@ -88,7 +84,7 @@ if(!empty($error)){ ?>
 
         $("span").css('color','red');
 
-        $("#login").click(function (){
+        $("#forget").click(function (){
             var error = "no";
             email = $("input[name='email']").val();
             password = $("input[name='password']").val();
@@ -96,17 +92,17 @@ if(!empty($error)){ ?>
             if(email == ""){
                 error = "yes";
                 $("#email_err").html("email or name is required");
-                $("#login").prop('disabled',true);
+                $("#forget").prop('disabled',true);
             }
 
             if(password == ""){
                 error = "yes";
                 $("#password_err").html("password is required");
-                $("#login").prop('disabled',true);
+                $("#forget").prop('disabled',true);
             }
 
             if(error == "no"){
-                $("#login").prop('disabled',false);
+                $("#forget").prop('disabled',false);
                 $("form").submit();
             }
 
@@ -114,12 +110,12 @@ if(!empty($error)){ ?>
         });
 
         $("#email").keyup(function (){
-            $("#login").prop('disabled',false);
+            $("#forget").prop('disabled',false);
             $("#email_err").html("");
         });
 
         $("#password").keyup(function (){
-            $("#login").prop('disabled',false);
+            $("#forget").prop('disabled',false);
             $("#password_err").html("");
         });
 
